@@ -127,20 +127,39 @@ ReactDOM.render(
 );
 
 function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+  const winLength = 3; 
+  const boardLength = 3;
+  for (let i = 0; i < squares.length; i++) {
+    let rightLink = 1;
+    while(squares[i + rightLink] === squares[i]){
+      rightLink++; 
+      if(rightLink === winLength){
+        return squares[i];
+      }
+    }
+
+    let downRightLink = 1;
+    while(squares[i + (downRightLink * (boardLength + 1))] === squares[i]){
+      downRightLink++; 
+      if(downRightLink === winLength){
+        return squares[i];
+      }
+    }
+
+    let upRightLink = 1;
+    while(squares[i - (upRightLink * (boardLength - 1))] === squares[i]){
+      upRightLink++; 
+      if(upRightLink === winLength){
+        return squares[i];
+      }
+    }
+
+    let downLink = 1;
+    while(squares[i + (downLink * boardLength)] === squares[i]){
+      downLink++; 
+      if(downLink === winLength){
+        return squares[i];
+      }
     }
   }
   return null;
