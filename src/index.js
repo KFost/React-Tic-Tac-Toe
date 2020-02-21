@@ -20,24 +20,31 @@ class Board extends React.Component {
     );
   }
 
+  createBoard(){
+    var boardRows = Array(this.props.boardSize).fill(null);
+    var boardSquares = Array(this.props.boardSize).fill(null); 
+
+    for(let i = 0; i < (this.props.boardSize); i++){
+      let str = Array(this.props.boardSize).fill(null);
+
+      for(let y = 0; y < (this.props.boardSize); y++){
+        str[y] = this.renderSquare((i * this.props.boardSize) + (y));
+      }
+
+      boardSquares[i] = str;
+      boardRows[i] = <div className="board-row">{boardSquares[i]}</div>;
+    }
+
+    return (
+      boardRows
+    );
+  }
+
   render() {
+    
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+          {this.createBoard()}
       </div>
     );
   }
@@ -52,6 +59,7 @@ class Game extends React.Component {
       }],
       xIsNext: true,
       stepNumber: 0,
+      boardSize: 3,
     };
   }
 
@@ -82,7 +90,7 @@ class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winner = calculateWinner(current.squares, this.state.boardSize);
 
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -108,6 +116,7 @@ class Game extends React.Component {
           <Board
             squares={current.squares}
             onClick={i => this.handleClick(i)}
+            boardSize={this.state.boardSize}
           />
         </div>
         <div className="game-info">
@@ -126,39 +135,41 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-function calculateWinner(squares) {
+function calculateWinner(squares, boardLength) {
   const winLength = 3; 
-  const boardLength = 3;
   for (let i = 0; i < squares.length; i++) {
-    let rightLink = 1;
-    while(squares[i + rightLink] === squares[i]){
-      rightLink++; 
-      if(rightLink === winLength){
-        return squares[i];
-      }
-    }
+    if(squares[i] !== null){
 
-    let downRightLink = 1;
-    while(squares[i + (downRightLink * (boardLength + 1))] === squares[i]){
-      downRightLink++; 
-      if(downRightLink === winLength){
-        return squares[i];
+      let rightLink = 1;
+      while(squares[i] === squares[i + rightLink] && (i + rightLink) % boardLength !== 0){
+        rightLink++; 
+        if(rightLink === winLength){
+          return squares[i];
+        }
       }
-    }
 
-    let upRightLink = 1;
-    while(squares[i - (upRightLink * (boardLength - 1))] === squares[i]){
-      upRightLink++; 
-      if(upRightLink === winLength){
-        return squares[i];
+      let downRightLink = 1;
+      while(squares[i] === squares[i + ((downRightLink * boardLength) + downRightLink)]){
+        downRightLink++; 
+        if(downRightLink === winLength){
+          return squares[i];
+        }
       }
-    }
 
-    let downLink = 1;
-    while(squares[i + (downLink * boardLength)] === squares[i]){
-      downLink++; 
-      if(downLink === winLength){
-        return squares[i];
+      let upRightLink = 1;
+      while(squares[i] === squares[i - ((upRightLink * boardLength) - upRightLink)]){
+        upRightLink++; 
+        if(upRightLink === winLength){
+          return squares[i];
+        }
+      }
+
+      let downLink = 1;
+      while(squares[i] === squares[i + (downLink * boardLength)]){
+        downLink++; 
+        if(downLink === winLength){
+          return squares[i];
+        }
       }
     }
   }
