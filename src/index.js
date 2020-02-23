@@ -21,22 +21,21 @@ class Board extends React.Component {
   }
 
   createBoard(){
-    var boardRows = Array(this.props.boardSize).fill(null);
-    var boardSquares = Array(this.props.boardSize).fill(null); 
+    var board = Array(this.props.boardSize).fill(null);
+    var boardRows = Array(this.props.boardSize * this.props.boardSize).fill(null); 
 
     for(let i = 0; i < (this.props.boardSize); i++){
-      let str = Array(this.props.boardSize).fill(null);
+      let squares = Array(this.props.boardSize).fill(null);
 
       for(let y = 0; y < (this.props.boardSize); y++){
-        str[y] = this.renderSquare((i * this.props.boardSize) + (y));
+        squares[y] = this.renderSquare((i * this.props.boardSize) + (y));
       }
 
-      boardSquares[i] = str;
-      boardRows[i] = <div className="board-row">{boardSquares[i]}</div>;
+      boardRows[i] = squares;
+      board[i] = <div className="board-row">{boardRows[i]}</div>;
     }
-
     return (
-      boardRows
+      board
     );
   }
 
@@ -60,6 +59,7 @@ class Game extends React.Component {
       xIsNext: true,
       stepNumber: 0,
       boardSize: 3,
+      winLength: 3,
     };
   }
 
@@ -67,7 +67,7 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]){
+    if (calculateWinner(squares, this.state.boardSize, this.state.winLength) || squares[i]){
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
@@ -86,11 +86,27 @@ class Game extends React.Component {
       xIsNext: (step % 2) === 0,
     });
   }
+
+  newGame(){
+    var newBoardSize = document.getElementById("bSize").value ? Number(document.getElementById("bSize").value) : 3;
+    var newWinLength = document.getElementById("wLength").value ? Number(document.getElementById("wLength").value) : 3;
+
+    const newBoard = Array(this.state.boardSize * this.state.boardSize).fill(null);
+    this.setState({
+      history: [{
+        squares: newBoard, 
+      }],
+      xIsNext: true,
+      stepNumber: 0,
+      boardSize: newBoardSize,
+      winLength: newWinLength,
+    });
+  }
   
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares, this.state.boardSize);
+    const winner = calculateWinner(current.squares, this.state.boardSize, this.state.winLength);
 
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -121,9 +137,16 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
+          <br/>
+          Board Size: <input type="number" id="bSize"></input>
+          <br/>
+          Win Length: <input type="number" id="wLength"></input>
+          <br/>
+          <button value = "Submit" onClick={() => this.newGame()}>New Game</button>
+          <br/>
           <ol>{moves}</ol>
         </div>
-      </div>
+      </div>  
     );
   }
 }
@@ -135,8 +158,7 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-function calculateWinner(squares, boardLength) {
-  const winLength = 3; 
+function calculateWinner(squares, boardLength, winLength) {
   for (let i = 0; i < squares.length; i++) {
     if(squares[i] !== null){
 
